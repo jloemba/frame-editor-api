@@ -1,107 +1,143 @@
 ﻿import { google } from "googleapis";
-import { createOAuth2Client } from "./auth/oauth";
+import { createOAuth2Client } from "../services/auth/oauth";
+import allSongs from "../fixtures/songs.json";
+import dotenv from "dotenv";
+import path from "path";
+import { CultSectionLabel, CultSubsectionLabel } from "../enums";
+
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+
+const TEMPLATE_DOC_ID = process.env.TEMPLATE_DOC_ID || "";
+const DRIVE_FOLDER_ID = process.env.DRIVE_FOLDER_ID || "";
+
+export interface ISongRef { id: number; }
+export interface ISubSection { label: string; songs: ISongRef[]; }
+export interface ISection { title: string; subSections?: ISubSection[]; songs?: ISongRef[]; }
+
+interface Song { id: number; title: string; lyrics: string; author?: string; choir?: string; }
 
 export class GoogleDocsService {
-  
-  private readonly templateId: string = process.env.TEMPLATE_DOC_ID || ""; 
-  private readonly folderId: string = process.env.DRIVE_FOLDER_ID || "";
+  async generateCulteDoc(date: string, context: string, sections: ISection[]): Promise<string> {
+    if (!TEMPLATE_DOC_ID) throw new Error("TEMPLATE_DOC_ID non défini (env).");
+    if (!DRIVE_FOLDER_ID) throw new Error("DRIVE_FOLDER_ID non défini (env).");
 
-  async generateCulteDoc(formatedDate: string, songs: any[]) { 
     const auth = await createOAuth2Client();
-    const drive = google.drive({ version: "v3", auth });
     const docs = google.docs({ version: "v1", auth });
+    const drive = google.drive({ version: "v3", auth });
 
-    // 1️⃣ Copier le modèle dans le dossier de destination
-    const copy = await drive.files.copy({
-      fileId: this.templateId,
-      requestBody: {
-        name: `${formatedDate} – CANTIQUES DU CULTE`,
-        parents: [this.folderId],
-      },
-      fields: "id",
+    const formatedDate = new Date(date)
+      .toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+      .toUpperCase();
+
+    const fullContent = this.generateFullContent(sections);
+
+    // Copier le template
+    const copyRes = await drive.files.copy({
+      fileId: TEMPLATE_DOC_ID,
+      requestBody: { name: `EPE-M ${new Date(date).getFullYear()} - ${formatedDate} - ${context}`, parents: [DRIVE_FOLDER_ID] },
+      fields: "id,name"
     });
+    const newDocId = copyRes.data.id!;
+    console.log(`📄 Template copié : ${newDocId}`);
 
-    const newDocId = copy.data.id!;
-    console.log(`✅ Modèle copié → Nouveau document ID: ${newDocId}`);
+    // Remplacer les placeholders
+    const replaceRequests: any[] = [
+      { replaceAllText: { containsText: { text: "{{DATE}}", matchCase: true }, replaceText: formatedDate } },
+      { replaceAllText: { containsText: { text: "{{CONTEXT}}", matchCase: true }, replaceText: context } },
+      { replaceAllText: { containsText: { text: "{{CONTENT}}", matchCase: true }, replaceText: fullContent } },
+    ];
 
-    // 2️⃣ Récupérer le document pour connaître la longueur
-    const doc = await docs.documents.get({ documentId: newDocId });
-    const endIndex = doc.data.body!.content!.reduce(
-      (acc, el) => acc + (el.endIndex || 0) - (el.startIndex || 0),
-      0
-    );
-    const hymnContent = this.buildSongText(songs);
+    await docs.documents.batchUpdate({ documentId: newDocId, requestBody: { requests: replaceRequests } });
 
-    // 3️⃣ Remplacer la balise {{DATE}}
-    await docs.documents.batchUpdate({
-      documentId: newDocId,
-      requestBody: {
-        requests: [
-          {
-            replaceAllText: {
-              containsText: { text: "{{DATE}}", matchCase: true },
-              replaceText: formatedDate,
-            },
-          },
-        ],
-      },
-    });
+    // Récupérer le document pour appliquer styles
+    const docAfter = await docs.documents.get({ documentId: newDocId });
+    const startIndex = this.findInsertionIndexForText(docAfter.data, fullContent) ?? 1;
 
-    // 2️⃣ Insérer le texte
-    await docs.documents.batchUpdate({
-      documentId: newDocId,
-      requestBody: {
-        requests: [
-          {
-            insertText: {
-              location: { index: endIndex },
-              text: hymnContent,
-            },
-          },
-        ],
-      },
-    });
+    //const { sectionRanges, subSectionRanges } = this.findTextRanges(fullContent, startIndex);
 
-await docs.documents.batchUpdate({
-  documentId: newDocId,
-  requestBody: {
-    requests: [
-      {
-        updateTextStyle: {
-          range: {
-            startIndex: endIndex,
-            endIndex: endIndex + hymnContent.length,
-          },
-          textStyle: {
-            weightedFontFamily: {
-              fontFamily: "Century Gothic",
-              weight: 400
-            },
-            fontSize: {
-              magnitude: 18,
-              unit: "PT"
-            }
-          },
-          fields: "weightedFontFamily,fontSize",
-        },
-      },
-    ],
-  },
-});
+    const styleRequests: any[] = [];
+    // for (const r of sectionRanges) styleRequests.push({ updateTextStyle: { range: { startIndex: r.start, endIndex: r.end }, textStyle: { bold: true }, fields: "bold" } });
+    // for (const r of subSectionRanges) styleRequests.push({ updateTextStyle: { range: { startIndex: r.start, endIndex: r.end }, textStyle: { bold: true }, fields: "bold" } });
 
-    // 5️⃣ Retourner le lien du document final
+    if (styleRequests.length > 0) await docs.documents.batchUpdate({ documentId: newDocId, requestBody: { requests: styleRequests } });
+
+    // Partage public optionnel
+    try { await drive.permissions.create({ fileId: newDocId, requestBody: { role: "reader", type: "anyone" } }); } 
+    catch (err) { console.warn("⚠️ Impossible de rendre le doc public :", err); }
+
     const docUrl = `https://docs.google.com/document/d/${newDocId}/edit`;
-    console.log(`✅ Feuille de chant générée : ${docUrl}`);
+    console.log(`✅ Document généré : ${docUrl}`);
     return docUrl;
   }
 
-  // 💬 Génère un texte simple pour les chants
-  private buildSongText(songs: any[]) {
-    return songs
-      .map(
-        (song: any, index: number) =>
-          `${index + 1}. ${song.title}\n${song.lyrics}\n`
-      )
-      .join("\n");
+  private generateFullContent(sections: ISection[]): string {
+    const lines: string[] = [];
+    for (const section of sections) {
+      if (!Object.values(CultSectionLabel).includes(section.title as CultSectionLabel)) continue;
+      lines.push(`${section.title.toUpperCase()}\n\n`);
+
+      if (section.subSections && section.subSections.length > 0) {
+        for (const sub of section.subSections) {
+          if (!Object.values(CultSubsectionLabel).includes(sub.label as CultSubsectionLabel)) continue;
+          lines.push(`• ${sub.label}\n`);
+          for (const songRef of sub.songs || []) {
+            const song = (allSongs as Song[]).find(s => s.id === songRef.id);
+            if (!song) { lines.push(`(Chant introuvable id:${songRef.id})\n\n`); continue; }
+            const title = song.title?.toUpperCase() ?? "CHANT SANS TITRE";
+            const author = song.author ? ` (${song.author})` : "";
+            lines.push(`${title}${author}\n\n${song.lyrics}\n\n`);
+          }
+        }
+      } else if (section.songs && section.songs.length > 0) {
+        for (const songRef of section.songs) {
+          const song = (allSongs as Song[]).find(s => s.id === songRef.id);
+          if (!song) { lines.push(`(Chant introuvable id:${songRef.id})\n\n`); continue; }
+          const title = song.title?.toUpperCase() ?? "CHANT SANS TITRE";
+          const author = song.author ? ` (${song.author})` : "";
+          lines.push(`${title}${author}\n\n${song.lyrics}\n\n`);
+        }
+      }
+
+      lines.push("\n");
+    }
+
+    return lines.join("");
+  }
+
+  private findTextRanges(fullContent: string, baseIndex: number) {
+    const lines = fullContent.split("\n");
+    const sectionRanges: { start: number; end: number }[] = [];
+    const subSectionRanges: { start: number; end: number }[] = [];
+    let cursor = baseIndex;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      const lenWithNewline = line.length + 1;
+      if (!trimmed) { cursor += lenWithNewline; continue; }
+
+      if (trimmed === trimmed.toUpperCase() && trimmed.length > 3) sectionRanges.push({ start: cursor, end: cursor + line.length });
+      else if (trimmed.startsWith("•")) subSectionRanges.push({ start: cursor, end: cursor + line.length });
+
+      cursor += lenWithNewline;
+    }
+
+    return { sectionRanges, subSectionRanges };
+  }
+
+  private findInsertionIndexForText(document: any, needle: string): number | null {
+    if (!document.body || !Array.isArray(document.body.content)) return null;
+    const snippet = needle.slice(0, 60);
+    let cursor = 1;
+    for (const el of document.body.content) {
+      if (!el.paragraph) continue;
+      for (const e of el.paragraph.elements || []) {
+        const text = e.textRun?.content;
+        if (typeof text !== "string") continue;
+        const idx = text.indexOf(snippet);
+        if (idx !== -1) return cursor + idx;
+        cursor += text.length;
+      }
+    }
+    return null;
   }
 }

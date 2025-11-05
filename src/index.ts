@@ -3,7 +3,9 @@ import generateRouter from "./routes/generate";
 import { CONFIG } from "./config/env";
 import {createOAuth2Client, generateAuthUrl, getTokenFromCode} from './services/auth/oauth';
 import {createGoogleDocFromHtml, uploadDocxBuffer} from './services/drive';
-
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 import {Document, Packer, Paragraph, TextRun} from 'docx';
 

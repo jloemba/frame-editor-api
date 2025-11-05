@@ -1,7 +1,6 @@
 ﻿import { Router } from "express";
-import songs from "../fixtures/songs.json";
 import { GoogleDocsService } from "../services/googleDocsService";
-
+import { formatDateLongFR } from "../utils";
 const router = Router();
 const docsService = new GoogleDocsService();
 
@@ -15,32 +14,27 @@ const docsService = new GoogleDocsService();
 /**
  * GET /culte-doc?ids=1,2,3&date=2025-10-29
  */
-router.get("/", async (req, res) => {
-  const date = (req.query.date as string) || new Date().toLocaleDateString("fr-FR");
+router.post("/", async (req, res) => {
+  const { date, sections, context } = req.body;
 
-  // Filtrage optionnel par ids
-  let selectedSongs = songs;
-  const idsQuery = req.query.ids as string;
-  console.log(idsQuery);
-  if (idsQuery) {
-    const ids = idsQuery.split(",").map((id) => parseInt(id, 10));
-    selectedSongs = songs.filter((song) => ids.includes(song.id));
+  if (!sections || !Array.isArray(sections)) {
+    return res.status(400).json({ error: "Le corps de la requête doit contenir un tableau 'sections'." });
   }
 
   try {
-    const docUrl = await docsService.generateCulteDoc(date, selectedSongs);
+    const docUrl = await docsService.generateCulteDoc(formatDateLongFR(date),context, sections);
 
-    console.log(`✅ Feuille de chant générée : ${docUrl}`);
     res.json({
-      message: "Feuille de chant générée avec succès ! 🎶",
+      message: "Feuille de culte générée avec succès ! 🎶",
       docUrl,
       date,
-      nombreChants: selectedSongs.length,
+      nombreSections: sections.length,
     });
   } catch (err) {
     console.error("Erreur lors de la génération :", err);
     res.status(500).json({ error: "Erreur lors de la génération de la feuille de chant" });
   }
 });
+
 
 export default router;
