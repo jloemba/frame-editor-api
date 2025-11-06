@@ -1,20 +1,10 @@
 ﻿import { Router } from "express";
-import { GoogleDocsService } from "../services/googleDocsService";
+import { GoogleDocsService } from "../services/google/googleDocsService";
 import { formatDateLongFR } from "../utils";
 const router = Router();
 const docsService = new GoogleDocsService();
 
-/**
- * GET /culte-doc
- * Génère une feuille de chant Google Docs à partir des chants sélectionnés.
- * Exemples :
- *   /culte-doc?date=2025-10-29
- *   /culte-doc?ids=1,3,5
- */
-/**
- * GET /culte-doc?ids=1,2,3&date=2025-10-29
- */
-router.post("/", async (req, res) => {
+router.post("/generate", async (req, res) => {
   const { date, sections, context } = req.body;
 
   if (!sections || !Array.isArray(sections)) {
@@ -22,7 +12,7 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    const docUrl = await docsService.generateCulteDoc(formatDateLongFR(date),context, sections);
+    const docUrl = await docsService.generateCulteDocFromTemplate(formatDateLongFR(date),context, sections);
 
     res.json({
       message: "Feuille de culte générée avec succès ! 🎶",
