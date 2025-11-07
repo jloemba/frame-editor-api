@@ -1,5 +1,5 @@
-﻿import { GoogleDocsService } from "../../src/services/google/googleDocsService";
-import { CultSectionLabel } from "../../src/enums";
+﻿import { GoogleDocsService } from "../../../src/services/google/googleDocsService";
+import { CultSectionLabel } from "../../../src/enums";
 
 // Mock googleapis and oauth
 const mockCopy = jest.fn();
@@ -24,7 +24,7 @@ jest.mock("googleapis", () => ({
   },
 }));
 
-jest.mock("../../src/services/auth/oauth", () => ({
+jest.mock("../../../src/services/auth/oauth", () => ({
   createOAuth2Client: jest.fn().mockResolvedValue("fake-auth"),
 }));
 

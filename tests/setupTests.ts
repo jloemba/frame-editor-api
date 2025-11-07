@@ -1,0 +1,1 @@
+﻿jest.setTimeout(20000); // 20s pour les tests E2E

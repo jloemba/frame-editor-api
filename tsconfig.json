@@ -42,6 +42,12 @@
       "@utils/*": [
         "utils/*"
       ],
+      "@db/*": [
+        "db/*"
+      ],
+      "@models/*": [
+        "models/*"
+      ],
     }
   },
   "include": [

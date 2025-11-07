@@ -22,6 +22,9 @@ const config: Config = {
 
   clearMocks: true,
   moduleFileExtensions: ["ts", "js", "json", "node"],
+  
+  setupFilesAfterEnv: ["<rootDir>/tests/setupTests.ts"],
+
 };
 
 export default config;
