@@ -2,7 +2,11 @@
 import { createOAuth2Client } from "../../services/auth/oauth";
 import dotenv from "dotenv";
 import path from "path";
-import { CultSectionLabel, CultSubsectionLabel } from "../../enums/index";
+import {
+  CultSectionLabel,
+  CultSubsectionLabel,
+  Choirs,
+} from "../../enums/index";
 import { ISection, ISong } from "../../types/index";
 import { SongRepository } from "../../repositories/song";
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
@@ -43,7 +47,6 @@ export class GoogleDocsService {
     context: string,
     sections: ISection[]
   ): Promise<string> {
-
     if (this.songs.length === 0) {
       await this.loadDBSong();
     }
@@ -126,7 +129,7 @@ export class GoogleDocsService {
           for (const songRef of sub.songs || []) {
             const song = this.songs.find((s) => s.id === songRef.id);
             if (!song) continue;
-            lines.push(this.formatSong(song));
+            lines.push(this.formatSong(song, songRef.choir!));
           }
         }
       } else if (section.songs && section.songs.length > 0) {
@@ -143,9 +146,23 @@ export class GoogleDocsService {
     return lines.join("");
   }
 
-  private formatSong(song: ISong): string {
+  private formatSong(song: ISong, choir?: string): string {
     const title = song.title?.toUpperCase() ?? "CHANT SANS TITRE";
-    const author = song.author ? ` (${song.author})` : "";
-    return `${title}${author}\n\n${song.lyrics}\n\n`;
+    const author = song.author ? ` (${song.author})` : "(Auteur inconnu)";
+    const choirLabel = choir ? `chanté par ${this.prefixChoirPronoun(choir)}` : "";
+    return `${title}${author} ${choirLabel}\n\n${song.lyrics}\n\n`;
+  }
+
+  private prefixChoirPronoun(choirLabel: string): string {
+    switch (choirLabel) {
+      case Choirs.PRAISE_AND_WORSHIP_TEAM:
+        return "la Praise and Worship Team";
+      case Choirs.SEV_LA_SOURCE_D_EAU_VIVE:
+        return "la Chorale SEV ‘La Source d’Eau Vive’";
+      case Choirs.CHOEUR_DE_CHANTS_DE_REVEIL_CCR_L_EPEE_DE_L_ESPRIT:
+        return "le Chœur de chants de réveil CCR ‘L’Épée de l’Esprit’";
+      default:
+        return "";
+    }
   }
 }

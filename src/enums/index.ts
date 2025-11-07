@@ -43,3 +43,9 @@ export enum CultSubsectionLabel {
     DOXOLOGY_FINAL_PRAISE = "Doxologie – Louange finale",
     CHURCH_INTERCESSION_PRAYER = "Prière d’intercession de l’Église"
 }
+
+export enum Choirs {
+    PRAISE_AND_WORSHIP_TEAM = "Praise and Worship Team",
+    SEV_LA_SOURCE_D_EAU_VIVE = "Chorale SEV ‘La Source d’Eau Vive’’",
+    CHOEUR_DE_CHANTS_DE_REVEIL_CCR_L_EPEE_DE_L_ESPRIT = "Chœur de chants de réveil CCR ‘L’Épée de l’Esprit’"
+}

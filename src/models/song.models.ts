@@ -10,6 +10,8 @@ export class Song extends Model {
   declare author?: string;
   declare informations?: string;
   declare status?: string;
+  declare createdAt?: string;
+  declare updatedAt?: string;
 }
 
 Song.init(
@@ -39,6 +41,15 @@ Song.init(
     },
     status: {
       type: DataTypes.STRING,
+    },
+
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
     },
   },
   {
