@@ -5,20 +5,22 @@ const router = Router();
 const docsService = new GoogleDocsService();
 
 router.post("/generate", async (req, res) => {
-  const { date, sections, context } = req.body;
+  const { date, parts, context } = req.body;
 
-  if (!sections || !Array.isArray(sections)) {
-    return res.status(400).json({ error: "Le corps de la requête doit contenir un tableau 'sections'." });
+  if (!parts || !Array.isArray(parts)) {
+    return res.status(400).json({ error: "Le corps de la requête doit contenir un tableau 'parts'." });
   }
-
+  console.log("Received parts:", parts); 
+  console.log("Received date:", date);
+  console.log("Received context:", context);
   try {
-    const docUrl = await docsService.generateCulteDocFromTemplate(formatDateLongFR(date),context, sections);
+    const docUrl = await docsService.generateEventDocFromTemplate(formatDateLongFR(date),context, parts);
 
     res.json({
       message: "Feuille de culte générée avec succès ! 🎶",
       docUrl,
       date,
-      nombreSections: sections.length,
+      partCount: parts.length,
     });
   } catch (err) {
     console.error("Erreur lors de la génération :", err);

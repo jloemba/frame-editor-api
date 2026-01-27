@@ -1,7 +1,7 @@
-﻿export enum CultSectionLabel {
+﻿export enum CultPartLabel {
   CULT_OPENING = "OUVERTURE DU CULTE",
   REPENTANCE = "REPENTANCE",
-  WELCOMING_FORGIVENESS_EXPRESSING_GRATITUDE = "ACCUEIL DU PARDON ET EXPRESSION DE LA  RECONNAISSANCE",
+  WELCOMING_FORGIVENESS_EXPRESSING_GRATITUDE = "ACCUEIL DU PARDON ET EXPRESSION DE LA RECONNAISSANCE",
   GREETINGS = "PAROLES D’ACCUEIL ET DE BIENVENUE",
   ANNOUNCEMENTS = "ANNONCES OU ÉCHANGE DE NOUVELLES",
   GOD_WORD_PROCLAIMING = "PROCLAMATION DE LA PAROLE",
@@ -12,8 +12,9 @@
   CULT_ENDING = "CLÔTURE DU CULTE"
 }
 
-export enum CultSubsectionLabel {
-    OPENING_WORSHIP = "Louange d’ouverture",
+export enum CultSubPartLabel {
+    GREETINGS = "Salutation liturgique",
+    OPENING_WORSHIP = "Louange d’ouverture du culte",
     EXPRESSION_WORSHIP = "Louange et/ou Expression",
     WORSHIP = "Louange",
     OPENING_PRAYING="Prière d’ouverture",
@@ -27,8 +28,8 @@ export enum CultSubsectionLabel {
     REPENTANCE_WORSHIP = "Cantique de repentance",
     GRACE_FORGIVENESS_GREETINGS_WORDS = "Parole d’accueil du pardon et de la grâce",
     TESTIMONY_OR_THANKSGIVING = "Témoignage ou actions de grâces",
-    THANKSGIVING_WORSHIP = "Louange de reconnaissance",
-    MODERATOR = "Place au modérateur",
+    THANKSGIVING_WORSHIP = "Cantique de reconnaissance",
+    MODERATOR = "Place au modérateur zoom pour l’accueil",
     WORD_OF_WELCOME = "Mot d’accueil et de bienvenue",
     PRAYER_BEFORE_GOD_WORD_PROCLAIMING = "Prière avant l’écoute de la parole",
     BIBLE_READING = "Lecture de la Bible",
@@ -36,12 +37,14 @@ export enum CultSubsectionLabel {
     INSTRUMENTAL_AFTER_GOD_WORDS_PROCLAIMING = "Musique instrumentale de recueillement après l’écoute de la parole",
     CHURCH_PRAYING_ON_GOD_WORD = "Prière sur la parole",
     ANNOUNCEMENTS = "Annonces ou échange de nouvelles",
-    OFFERINGS_INTRODUCTION = " Introduction à la collecte des offrandes",
+    OFFERINGS_INTRODUCTION = "Introduction à la collecte des offrandes",
     OFFERINGS_COLLECTION_WITH_MUSIC = "Collecte des offrandes sur un jeu de musique instrumentale",
     OFFERINGS_PRAYER = "Prière sur les offrandes",
     ADORATION_HYMN_BEFORE_GOD_WORD_PROCLAIMING = "Cantique d’adoration avant l’écoute de la parole",
     DOXOLOGY_FINAL_PRAISE = "Doxologie – Louange finale",
-    CHURCH_INTERCESSION_PRAYER = "Prière d’intercession de l’Église"
+    EXHORTATION_BY = "Exhortation par ______",
+    CHURCH_INTERCESSION_PRAYER = "Prière d’intercession",
+    OUR_FATHER_PRAYER = "Notre Père et Bénédiction de clôture"
 }
 
 export enum Choirs {

@@ -3,18 +3,21 @@ import { createOAuth2Client } from "../../services/auth/oauth";
 import dotenv from "dotenv";
 import path from "path";
 import {
-  CultSectionLabel,
-  CultSubsectionLabel,
+  CultPartLabel,
+  CultSubPartLabel,
   Choirs,
 } from "../../enums/index";
-import { ISection, ISong } from "../../types/index";
+import { IPart, ISong } from "../../types/index";
 import { SongRepository } from "../../repositories/song";
+import { FrameRepository } from "../../repositories/frame";
+import { parseFrenchDate } from "@/utils";
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 export class GoogleDocsService {
   private readonly templateDocId: string;
   private readonly driveFolderId: string;
   private readonly songRepository!: SongRepository;
+  private readonly frameRepository!: FrameRepository;
   private docsClient!: docs_v1.Docs;
   private driveClient!: drive_v3.Drive;
   private songs: ISong[] = [];
@@ -23,6 +26,7 @@ export class GoogleDocsService {
     this.templateDocId = process.env.TEMPLATE_DOC_ID || "";
     this.driveFolderId = process.env.DRIVE_FOLDER_ID || "";
     this.songRepository = new SongRepository();
+    this.frameRepository = new FrameRepository();
 
     if (!this.templateDocId) {
       throw new Error("❌ TEMPLATE_DOC_ID non défini dans le fichier .env");
@@ -42,17 +46,17 @@ export class GoogleDocsService {
     this.driveClient = google.drive({ version: "v3", auth });
   }
 
-  async generateCulteDocFromTemplate(
+  async generateEventDocFromTemplate(
     formattedDate: string,
     context: string,
-    sections: ISection[]
+    parts: IPart[],
   ): Promise<string> {
     if (this.songs.length === 0) {
       await this.loadDBSong();
     }
     await this.initGoogleClients();
 
-    const fullContent = this.generateFullContent(sections);
+    const fullContent = this.convertStepEventToDocsContent(parts);
 
     const copyResponse = await this.driveClient.files.copy({
       fileId: this.templateDocId,
@@ -101,42 +105,47 @@ export class GoogleDocsService {
     }
 
     const docUrl = `https://docs.google.com/document/d/${newDocId}/edit`;
+
+    const formattedDateSql = parseFrenchDate(formattedDate); // "2026-02-08"
+
+    this.frameRepository.upsertFrame({
+      title: `${formattedDate} - ${context}`,
+      eventDate: formattedDateSql,
+      context,
+      content: fullContent,
+      docUrl,
+    });
+
     return docUrl;
   }
 
-  private generateFullContent(sections: ISection[]): string {
+  private convertStepEventToDocsContent(parts: IPart[]): string {
     const lines: string[] = [];
 
-    for (const section of sections) {
+    for (const part of parts) {
       if (
-        !Object.values(CultSectionLabel).includes(
-          section.title as CultSectionLabel
+        !Object.values(CultPartLabel).includes(
+          part.title as CultPartLabel,
         )
       )
         continue;
 
-      lines.push(`${section.title.toUpperCase()}\n\n`);
+      lines.push(`${part.title.toUpperCase()}\n\n`);
 
-      if (section.subSections && section.subSections.length > 0) {
-        for (const sub of section.subSections) {
+      if (part.subPart && part.subPart.length > 0) {
+        for (const sub of part.subPart) {
           if (
-            !Object.values(CultSubsectionLabel).includes(
-              sub.label as CultSubsectionLabel
+            !Object.values(CultSubPartLabel).includes(
+              sub.label as CultSubPartLabel,
             )
           )
             continue;
           lines.push(`• ${sub.label}\n`);
           for (const songRef of sub.songs || []) {
             const song = this.songs.find((s) => s.id === songRef.id);
-            if (!song) continue;
-            lines.push(this.formatSong(song, songRef.choir!));
+            if (!song && !songRef.choir) continue;
+            lines.push(this.formatSong(song!, songRef.choir!));
           }
-        }
-      } else if (section.songs && section.songs.length > 0) {
-        for (const songRef of section.songs) {
-          const song = this.songs.find((s) => s.id === songRef.id);
-          if (!song) continue;
-          lines.push(this.formatSong(song));
         }
       }
 
@@ -146,11 +155,16 @@ export class GoogleDocsService {
     return lines.join("");
   }
 
-  private formatSong(song: ISong, choir?: string): string {
-    const title = song.title?.toUpperCase() ?? "CHANT SANS TITRE";
-    const author = song.author ? ` (${song.author})` : "(Auteur inconnu)";
-    const choirLabel = choir ? `chanté par ${this.prefixChoirPronoun(choir)}` : "";
-    return `${title}${author} ${choirLabel}\n\n${song.lyrics}\n\n`;
+  private formatSong(song?: ISong, choir?: string): string {
+    if (!song && choir) {
+      return `• Chant par ${this.prefixChoirPronoun(choir)}\n`;
+    }
+    const title = song!.title?.toUpperCase() ?? "CHANT SANS TITRE";
+    const author = song!.author ? ` (${song!.author})` : "(Auteur inconnu)";
+    const choirLabel = choir
+      ? `chanté par ${this.prefixChoirPronoun(choir)}`
+      : "";
+    return `${title}${author} ${choirLabel}\n\n${song!.lyrics}\n\n`;
   }
 
   private prefixChoirPronoun(choirLabel: string): string {

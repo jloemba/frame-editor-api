@@ -141,7 +141,7 @@ async function saveTokens(tokens: Credentials) {
   const existing = await loadTokensSafe();
   const merged = { ...existing, ...tokens };
   await fs.writeFile(TOKEN_PATH, JSON.stringify(merged, null, 2));
-  console.log("✅ Tokens sauvegardés dans", TOKEN_PATH);
+  //console.log("✅ Tokens sauvegardés dans", TOKEN_PATH);
 }
 
 // ------------------------------------------------------------

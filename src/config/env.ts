@@ -8,6 +8,7 @@ interface IConfig {
     driveFolderId:string;
     clientEmail:string;
     privateKey:string;
+    corsOrigin?:string;
 }
 export const CONFIG:IConfig = {
   port: process.env.PORT || 3000,
@@ -16,4 +17,5 @@ export const CONFIG:IConfig = {
   driveFolderId: process.env.DRIVE_FOLDER_ID!,
   clientEmail:process.env.CLIENT_EMAIL!,
   privateKey:process.env.PRIVATE_KEY!,
+  corsOrigin:process.env.CORS_ORIGIN || 'http://localhost:3000',
 };

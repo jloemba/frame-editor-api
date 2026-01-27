@@ -71,7 +71,7 @@ describe("GoogleDocsService copyResponse", () => {
       },
     ];
 
-    const url = await service.generateCulteDocFromTemplate(
+    const url = await service.generateEventDocFromTemplate(
       "2025-11-05",
       "Culte du Dimanche",
       sections
@@ -95,7 +95,7 @@ describe("GoogleDocsService copyResponse", () => {
     ];
 
     await expect(
-      service.generateCulteDocFromTemplate(
+      service.generateEventDocFromTemplate(
         "2025-11-05",
         "Culte du Dimanche",
         sections
@@ -117,7 +117,7 @@ describe("GoogleDocsService copyResponse", () => {
     ];
 
     await expect(
-      service.generateCulteDocFromTemplate(
+      service.generateEventDocFromTemplate(
         "2025-11-05",
         "Culte du Dimanche",
         sections
@@ -139,7 +139,7 @@ describe("GoogleDocsService copyResponse", () => {
     ];
 
     await expect(
-      service.generateCulteDocFromTemplate(
+      service.generateEventDocFromTemplate(
         "2025-11-05",
         "Culte du Dimanche",
         sections
@@ -160,12 +160,11 @@ describe("GoogleDocsService copyResponse", () => {
       },
     ];
 
-    const url = await service.generateCulteDocFromTemplate(
+    const url = await service.generateEventDocFromTemplate(
       "2025-11-05",
       "Culte du Dimanche",
       sections
     );
-    console.log(url);
     expect(url).toBe("https://docs.google.com/document/d/new-doc-id/edit");
   });
 
@@ -176,7 +175,7 @@ describe("GoogleDocsService copyResponse", () => {
 
     const sections: any[] = [];
 
-    const url = await service.generateCulteDocFromTemplate(
+    const url = await service.generateEventDocFromTemplate(
       "2025-11-05",
       "Culte du Dimanche",
       sections
@@ -184,7 +183,7 @@ describe("GoogleDocsService copyResponse", () => {
     expect(url).toBe("https://docs.google.com/document/d/new-doc-id/edit");
 
     await expect(
-      service.generateCulteDocFromTemplate(
+      service.generateEventDocFromTemplate(
         "2025-11-05",
         "Culte du Dimanche",
         sections
