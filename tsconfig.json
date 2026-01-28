@@ -2,60 +2,29 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
-    "rootDir": ".",
+    "rootDir": "./", // On s'assure de partir de la racine
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "allowJs": false,
+    "allowJs": true, // Passé à true car ton dossier models contient du .js (index.js)
     "moduleResolution": "node",
     "isolatedModules": true,
-    "types": [
-      "node",
-      "jest"
-    ],
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "*"
-      ],
-      "@fixtures/*": [
-        "fixtures/*"
-      ],
-      "@config/*": [
-        "config/*"
-      ],
-      "@enums/*": [
-        "enums/*"
-      ],
-      "@routes/*": [
-        "routes/*"
-      ],
-      "@services/*": [
-        "services/*"
-      ],
-      "@types/*": [
-        "types/*"
-      ],
-      "@utils/*": [
-        "utils/*"
-      ],
-      "@db/*": [
-        "db/*"
-      ],
-      "@models/*": [
-        "models/*"
-      ],
+      "@/*": ["*"],
+      "@config/*": ["config/*"],
+      "@enums/*": ["enums/*"],
+      "@routes/*": ["routes/*"],
+      "@services/*": ["services/*"],
+      "@types/*": ["types/*"],
+      "@utils/*": ["utils/*"],
+      "@db/*": ["db/*"],
+      "@models/*": ["models/*"]
     }
   },
-  "include": [
-    "./**/*",
-    "tests/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["index.ts", "config/**/*", "db/**/*", "enums/**/*", "models/**/*", "repositories/**/*", "routes/**/*", "services/**/*", "types/**/*", "utils/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "tests"] // On exclut les tests du build dist
 }
