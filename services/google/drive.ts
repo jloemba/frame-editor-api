@@ -1,4 +1,4 @@
-﻿// src/drive.ts
+﻿
 // =======================================
 // Fournit des fonctions simples pour :
 // - Créer un document Google Docs depuis du HTML

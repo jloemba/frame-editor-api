@@ -1,9 +1,8 @@
-﻿// src/services/song.service.ts
-import { SongRepository } from "../repositories/song";
+﻿import { SongRepository } from "../repositories/song";
 import { Song } from "../models/song.models";
 
 export class SongService {
-  private songRepository: SongRepository;
+  private readonly songRepository: SongRepository;
 
   constructor() {
     this.songRepository = new SongRepository();

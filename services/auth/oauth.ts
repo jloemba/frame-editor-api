@@ -1,4 +1,4 @@
-﻿// src/oauth.ts
+﻿
 // =======================================
 // Gère toute la logique OAuth2 avec Google :
 // - Création du client OAuth2
