@@ -1,5 +1,4 @@
-﻿// src/routes/songs.ts
-import { Router } from "express";
+﻿import { Router } from "express";
 import { SongService } from "../services/song.service";
 
 const router = Router();

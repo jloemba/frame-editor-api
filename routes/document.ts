@@ -10,9 +10,7 @@ router.post("/generate", async (req, res) => {
   if (!parts || !Array.isArray(parts)) {
     return res.status(400).json({ error: "Le corps de la requête doit contenir un tableau 'parts'." });
   }
-  console.log("Received parts:", parts); 
-  console.log("Received date:", date);
-  console.log("Received context:", context);
+
   try {
     const docUrl = await docsService.generateEventDocFromTemplate(formatDateLongFR(date),context, parts);
 

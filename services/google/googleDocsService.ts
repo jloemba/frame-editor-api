@@ -2,15 +2,11 @@
 import { createOAuth2Client } from "../../services/auth/oauth";
 import dotenv from "dotenv";
 import path from "path";
-import {
-  CultPartLabel,
-  CultSubPartLabel,
-  Choirs,
-} from "../../enums/index";
+import { CultPartLabel, CultSubPartLabel, Choirs } from "../../enums/index";
 import { IPart, ISong } from "../../types/index";
 import { SongRepository } from "../../repositories/song";
 import { FrameRepository } from "../../repositories/frame";
-import { parseFrenchDate } from "@/utils";
+import { currentTimestampFR, parseFrenchDate } from "@/utils";
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 export class GoogleDocsService {
@@ -109,7 +105,7 @@ export class GoogleDocsService {
     const formattedDateSql = parseFrenchDate(formattedDate); // "2026-02-08"
 
     this.frameRepository.upsertFrame({
-      title: `${formattedDate} - ${context}`,
+      title: `${currentTimestampFR()} - CULTE DU ${formattedDate} - ${context}`,
       eventDate: formattedDateSql,
       context,
       content: fullContent,
@@ -123,11 +119,7 @@ export class GoogleDocsService {
     const lines: string[] = [];
 
     for (const part of parts) {
-      if (
-        !Object.values(CultPartLabel).includes(
-          part.title as CultPartLabel,
-        )
-      )
+      if (!Object.values(CultPartLabel).includes(part.title as CultPartLabel))
         continue;
 
       lines.push(`${part.title.toUpperCase()}\n\n`);
@@ -177,6 +169,35 @@ export class GoogleDocsService {
         return "le Chœur de chants de réveil CCR ‘L’Épée de l’Esprit’";
       default:
         return "";
+    }
+  }
+  async deleteDocumentByDocUrl(docUrl: string): Promise<boolean> {
+    // 1. Extraction sécurisée
+    const fileId = docUrl.match(/\/d\/(.*?)(\/|$)/)?.[1];
+
+    if (!fileId) {
+      console.warn(
+        `Impossible d'extraire l'ID du document depuis l'URL: ${docUrl}`,
+      );
+      return false;
+    }
+
+    try {
+      // 2. Initialisation (idéalement vérifier si déjà init)
+      await this.initGoogleClients();
+
+      // 3. Action
+      await this.driveClient.files.update({
+        fileId: fileId,
+        requestBody: { trashed: true },
+      });
+
+      console.log(`Document mis à la corbeille avec succès : ${fileId}`);
+      return true; // Retourne un booléen pour confirmer le succès
+    } catch (error) {
+      // 4. Log plus précis
+      console.error(`Erreur Drive lors de la suppression de ${fileId}:`, error);
+      return false;
     }
   }
 }

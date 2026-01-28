@@ -1,6 +1,6 @@
 ﻿// tests/integration/songRepository.int.test.ts
-import { sequelize } from "../../src/db/connection";
-import { Song } from "../../src/models/song.models";
+import { sequelize } from "../../db/connection";
+import { Song } from "../../models/song.models";
 
 describe("SongRepository - Integration", () => {
   beforeAll(async () => {

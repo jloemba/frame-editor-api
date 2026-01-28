@@ -1,7 +1,7 @@
 ﻿import request from "supertest";
-import { app } from "../../src/";
-import { sequelize } from "../../src/db/connection";
-import { Song } from "../../src/models/song.models";
+import { app } from "../../";
+import { sequelize } from "../../db/connection";
+import { Song } from "../../models/song.models";
 
 jest.mock("googleapis", () => ({
   google: {

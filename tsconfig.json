@@ -16,7 +16,7 @@
       "node",
       "jest"
     ],
-    "baseUrl": "./src",
+    "baseUrl": "./",
     "paths": {
       "@/*": [
         "*"
@@ -51,7 +51,7 @@
     }
   },
   "include": [
-    "src/**/*",
+    "./**/*",
     "tests/**/*"
   ],
   "exclude": [

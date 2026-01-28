@@ -9,7 +9,7 @@
     "test:int": "NODE_ENV=test jest --runInBand --detectOpenHandles --forceExit --roots tests/integration",
     "test:e2e": "NODE_ENV=test jest --runInBand --detectOpenHandles --forceExit --roots tests/e2e",
     "test:coverage": "jest --coverage --runInBand --detectOpenHandles --forceExit",
-    "dev": "npx tsx watch --env-file=.env src/index.ts",
+    "dev": "npx tsx watch --env-file=.env index.ts",
     "build": "tsc",
     "start": "node dist/index.js"
   },

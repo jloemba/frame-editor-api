@@ -1,5 +1,4 @@
-﻿// src/models/song.model.ts
-import { DataTypes, Model } from "sequelize";
+﻿import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../db/connection";
 
 export class Song extends Model {

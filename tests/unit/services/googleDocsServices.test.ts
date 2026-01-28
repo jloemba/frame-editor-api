@@ -1,5 +1,5 @@
-﻿import { GoogleDocsService } from "../../../src/services/google/googleDocsService";
-import { CultSectionLabel } from "../../../src/enums";
+﻿import { GoogleDocsService } from "../../../services/google/googleDocsService";
+import { CultPartLabel } from "../../../enums";
 
 // Mock googleapis and oauth
 const mockCopy = jest.fn();
@@ -24,7 +24,7 @@ jest.mock("googleapis", () => ({
   },
 }));
 
-jest.mock("../../../src/services/auth/oauth", () => ({
+jest.mock("../../../services/auth/oauth", () => ({
   createOAuth2Client: jest.fn().mockResolvedValue("fake-auth"),
 }));
 
@@ -65,7 +65,7 @@ describe("GoogleDocsService copyResponse", () => {
 
     const sections = [
       {
-        title: CultSectionLabel.CULT_OPENING,
+        title: CultPartLabel.CULT_OPENING,
         subSections: [],
         songs: [{ id: 1 }],
       },
@@ -88,7 +88,7 @@ describe("GoogleDocsService copyResponse", () => {
 
     const sections = [
       {
-        title: CultSectionLabel.CULT_OPENING,
+        title: CultPartLabel.CULT_OPENING,
         subSections: [],
         songs: [{ id: 1 }],
       },
@@ -110,7 +110,7 @@ describe("GoogleDocsService copyResponse", () => {
 
     const sections = [
       {
-        title: CultSectionLabel.CULT_OPENING,
+        title: CultPartLabel.CULT_OPENING,
         subSections: [],
         songs: [{ id: 1 }],
       },
@@ -132,7 +132,7 @@ describe("GoogleDocsService copyResponse", () => {
 
     const sections = [
       {
-        title: CultSectionLabel.CULT_OPENING,
+        title: CultPartLabel.CULT_OPENING,
         subSections: [],
         songs: [{ id: 1 }],
       },
@@ -154,7 +154,7 @@ describe("GoogleDocsService copyResponse", () => {
 
     const sections = [
       {
-        title: CultSectionLabel.CULT_OPENING,
+        title: CultPartLabel.CULT_OPENING,
         subSections: [],
         songs: [{ id: 1 }],
       },

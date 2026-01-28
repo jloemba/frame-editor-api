@@ -1,5 +1,4 @@
-﻿// src/routes/frame.routes.ts
-import { Router, Request, Response } from "express";
+﻿import { Router, Request, Response } from "express";
 import { FrameService } from "../services/frame.service";
 
 const router = Router();

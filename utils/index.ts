@@ -66,3 +66,15 @@ export function parseFrenchDate(dateStr: string): string {
 
     return `${year}-${month}-${paddedDay}`;
   }
+
+  export function currentTimestampFR(): string {
+        const now = new Date();
+    const timestamp = now.toLocaleString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return timestamp;
+  }
